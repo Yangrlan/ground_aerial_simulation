@@ -1,0 +1,79 @@
+<!--
+    小车底盘添加雷达
+-->
+<robot name="my_lidar" xmlns:xacro="http://wiki.ros.org/xacro">
+
+    <xacro:property name="horizontal_fov" value="70.4"/>
+    <xacro:property name="vertical_fov" value="70.4"/>
+    
+    <gazebo reference="livox">
+            <sensor type="ray" name="laser_livox">
+                <pose>0 0 0 0 0 0</pose>
+                <visualize>true</visualize>
+                <update_rate>10.0</update_rate>
+                <plugin name="gazebo_ros_laser_controller" filename="liblivox_laser_simulation.so">
+                    <ray>
+                      <scan>
+                        <horizontal>
+                        <samples>100</samples>
+                        <resolution>1</resolution>
+                        <min_angle>${-horizontal_fov/360*3.14159}</min_angle>
+                        <max_angle>${horizontal_fov/360*3.14159}</max_angle>
+                        </horizontal>
+                        <vertical>
+                        <samples>360</samples>
+                        <resolution>1</resolution>
+                        <min_angle>${-vertical_fov/360*3.14159}</min_angle>
+                        <max_angle>${vertical_fov/360*3.14159}</max_angle>
+                        </vertical>
+                      </scan>
+                      <range>
+                        <min>0.1</min>
+                        <max>80</max>
+                        <resolution>0.002</resolution>
+                      </range>
+                      <noise>
+		        <type>gaussian</type>
+		      	<mean>0.0</mean>
+		      	<stddev>0.01</stddev>
+		      </noise>
+                    </ray>
+                    <visualize>true</visualize>
+                    <samples>24000</samples>
+                    <downsample>1</downsample>
+                    <csv_file_name>package://livox_laser_simulation/scan_mode/avia.csv</csv_file_name>
+		  <ros_topic>/ugv/livox/lidar</ros_topic>
+                </plugin>
+            </sensor>
+  </gazebo>
+        
+  <link name="livox">
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                   <mesh filename="package://livox_laser_simulation/meshes/livox_mid40.dae">
+                   </mesh>
+                </geometry>
+            </collision>
+            
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <mesh filename="package://livox_laser_simulation/meshes/livox_mid40.dae">
+          	</mesh>
+                </geometry>
+                <material name="black"/>
+            </visual>
+            
+   </link>
+        
+        
+    <joint name="laser_livox_joint" type="fixed">
+            <origin xyz="0.2 0 0.2" rpy="0 0 0"/>
+            <parent link="base_link"/>
+            <child link="livox"/>
+    </joint>
+        
+    <gazebo reference="livox"/>
+    
+</robot>

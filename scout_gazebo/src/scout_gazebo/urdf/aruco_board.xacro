@@ -1,0 +1,28 @@
+<robot name="my_aruco" xmlns:xacro="http://wiki.ros.org/xacro">
+ 
+    <link name="marker_link">
+      <visual>
+      <origin xyz="0 0 0.008" rpy="0 0 0" />
+        <geometry>
+          <box size="0.42 0.42 1e-5" />
+        </geometry>
+      </visual>
+      <collision>
+      <origin xyz="0 0 0.008" rpy="0 0 0" />
+        <geometry>
+          <box size="0.42 0.42 1e-5" />
+        </geometry>
+      </collision>
+    </link>
+    
+    <joint name="maker_joint" type="fixed">
+    	<parent link="base_link" />
+        <child link="marker_link" />
+    	<origin xyz="-0.27 0 0.55" rpy="0 0 0" />
+    </joint>
+    
+    <gazebo reference="marker_link"> 
+    	<material>Gazebo/aruco</material>
+    </gazebo>
+    
+</robot>

@@ -1,0 +1,8 @@
+<launch>
+
+    <!-- Parameters -->
+    <rosparam file="$(find aruco_detection)/config/config.yaml" command="load" />
+
+    <node pkg="aruco_detection" type="aruco_detection_node"   name="aruco_detection_node"  output="screen" 	respawn="true"/>
+
+</launch>

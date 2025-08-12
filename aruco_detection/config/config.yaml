@@ -1,0 +1,7 @@
+arucoDet:
+  json_path: /home/vulcan/ground_aerial_simulation/src/aruco_detection/config/params.json
+  image_topic: /camera/image_raw
+  camMatrix: [771.621975, 0, 405.97,
+              0,  771.621975, 291.36,
+              0, 0, 1]
+  distCoeffs: [0, 0, 0, 0, 0]
