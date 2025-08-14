@@ -101,6 +101,8 @@ class LivoxPointsPlugin : public RayPlugin {
 
     double maxDist = 400.0;
     double minDist = 0.1;
+    
+    double last_start_time = -1.0;
 };
 
 }  // namespace gazebo

@@ -128,9 +128,18 @@ void LivoxPointsPlugin::OnNewLaserScans() {
         auto verticle_min = VerticalAngleMin().Radian();
         auto verticle_incre = VerticalAngleResolution();
 
-        double min_time = points_pair[0].second.time;
         sensor_msgs::PointCloud2 scan_point;
         scan_point.header.stamp = ros::Time::now();
+        float curr_start_time = scan_point.header.stamp.toSec();
+        float dura;
+        if(last_start_time == -1.0)
+        {
+            dura = 0.1;
+        }
+        else {
+            dura = curr_start_time - last_start_time;
+            last_start_time = curr_start_time;
+        }
         
         scan_point.header.frame_id = raySensor->Name();
         scan_point.fields.resize(5);
@@ -168,7 +177,18 @@ void LivoxPointsPlugin::OnNewLaserScans() {
         sensor_msgs::PointCloud2Iterator<float> iter_z(scan_point, "z");
         sensor_msgs::PointCloud2Iterator<uint8_t> iter_intensity(scan_point, "intensity");
         sensor_msgs::PointCloud2Iterator<float> iter_time(scan_point, "time");
-        
+
+        float max_timestamp = -1.0;
+        float min_timestamp = 1e5;
+        float min_time = 1e10;
+        float max_time = -1.0;
+        int cnt = 0;
+        for(auto &pair : points_pair) {
+            if(min_time > pair.second.time)
+            {
+                min_time = pair.second.time;
+            }
+        }
         for (auto &pair : points_pair) {
             auto range = rayShape->GetRange(pair.first);
             auto intensity = rayShape->GetRetro(pair.first);
@@ -177,7 +197,9 @@ void LivoxPointsPlugin::OnNewLaserScans() {
             } else if (range <= RangeMin()) {
                 range = 0;
             }
+
             auto rotate_info = pair.second;
+            if(rotate_info.time - min_time > samplesStep) { cnt++; continue; }
             ignition::math::Quaterniond ray;
             ray.Euler(ignition::math::Vector3d(0.0, rotate_info.zenith, rotate_info.azimuth));
             auto axis = ray * ignition::math::Vector3d(1.0, 0.0, 0.0);
@@ -185,8 +207,10 @@ void LivoxPointsPlugin::OnNewLaserScans() {
             *iter_x = point.X();  // x 坐标
             *iter_y = point.Y(); // y 坐标
             *iter_z = point.Z(); // z 坐标
-            *iter_intensity = static_cast<uint8_t>((int) intensity % 256); 
-            *iter_time = rotate_info.time - min_time;
+            *iter_intensity = static_cast<uint8_t>((int) intensity % 256);
+            *iter_time = (rotate_info.time - min_time) / samplesStep * dura;
+            max_timestamp = std::max(max_timestamp, *iter_time);
+            min_timestamp = std::min(min_timestamp, *iter_time);
 
             ++iter_x;
             ++iter_y;
@@ -194,6 +218,7 @@ void LivoxPointsPlugin::OnNewLaserScans() {
             ++iter_intensity;
             ++iter_time;
         }
+
         
         rosPointPub.publish(scan_point);
 
